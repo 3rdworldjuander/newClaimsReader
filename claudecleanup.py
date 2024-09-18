@@ -4,6 +4,8 @@ from azure.ai.formrecognizer import DocumentAnalysisClient
 import anthropic
 import os
 import sys
+import io
+import pandas as pd
 from dotenv import load_dotenv
 
 # Configuration
@@ -67,7 +69,7 @@ def analyze_document(document_analysis_client, file_path, model_id):
         )
     return poller.result()
 
-def main(pdf_file_path):
+def convert(pdf_file_path):
     azu_endpoint, azu_key, claude_api_key = load_env_variables()
     model_id = "prebuilt-layout"
     document_analysis_client = DocumentAnalysisClient(endpoint=azu_endpoint, credential=AzureKeyCredential(azu_key))
@@ -101,7 +103,14 @@ def main(pdf_file_path):
         
     print(f"CSV data has been saved to {output_file}")
 
+    df = pd.read_csv(io.StringIO(what_is_this))
+    service_auth = df['Service Auth'].unique()
+    service_auth_str = str(int(service_auth))
+    print(type(service_auth_str))
+    print(f'Service Authorization No: {service_auth_str}')
+
+    return df, service_auth_str
 
 if __name__ == "__main__":
     pdf_file_path = sys.argv[1]
-    main(pdf_file_path)
+    convert(pdf_file_path)
