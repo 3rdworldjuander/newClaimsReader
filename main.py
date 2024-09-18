@@ -19,16 +19,17 @@ os.makedirs("claude", exist_ok=True)
 def home():
     return Title("Service Log Converter"), Main(
         H1("FastHTML based Service Log Converter"),
-        H2("Description and Instructions"),
-        
+
         Form(
             Input(type="file", name="pdf_file", accept=".pdf", required=True),
             Button("Convert"),
-            enctype="multipart/form-data",
             hx_post="/convert",
+            enctype="multipart/form-data",
             hx_target="#result"
         ),
-        Br(), Div(id="result"),
+        Br(), 
+        
+        Div(id="result"), 
         cls="container"
     )
 
@@ -44,9 +45,32 @@ async def handle_classify(pdf_file:UploadFile):
     result, service_auth = convert(pdf_file_path)
     
     return Div(
-        P(f"Conversion result: {result}, Service Auth no: {service_auth}"),
-        Img(src=f"/uploads/{pdf_file.filename}", alt="Uploaded pdf_file", style="max-width: 300px;; transform: rotate(-90deg);")
-    )
+        # P(f'Converting {pdf_file.filename}'),
+        Div(
+            Div(
+                Strong(f'Converting {pdf_file.filename}'),
+                Div(
+                    Embed(
+                        src=f"/uploads/{pdf_file.filename}", 
+                        type='application/pdf',
+
+                        style="width: 150%; height: 150%;  scale(0.66); transform-origin: top center;"
+                    ),
+                    style="width: 100%; aspect-ratio: 1/1.4; display: flex; justify-content: center; align-items: center; overflow: hidden;"
+                    # style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: flex-start; overflow: hidden;"
+                ),
+                style="display: flex; flex-direction: column; align-items: center;"
+                # style="display: flex; flex-direction: column; align-items: center; height: 100%;"
+            ),
+            Div(
+                Strong(f'Service Authorization No:{service_auth}'),
+                Div(result),
+                style="overflow: auto;"
+            ),
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; height: 100vh;"
+            )
+        )
+
 
 @app.get("/uploads/{filename}")
 async def serve_upload(filename: str):

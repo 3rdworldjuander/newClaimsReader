@@ -8,3 +8,10 @@ Check the other rows to infer what dates and times should be written based on wh
 if there are any cells in the second or third column with nan, remove the whole row.  '
 please return a python dataframe with just the columns "Service Date", "Start Time", "End Time". Create a fourth column with header "Service Auth" and enter the Service Authorization number in all the rows.'
 Just reply with the corrected python dataframe and nothing else.'
+
+
+Useful FastHTML templates
+PDF Embed - https://gallery.fastht.ml/widgets/pdf/display
+CSV Uploader - https://gallery.fastht.ml/start_simple/csv_editor/app/
+Inline Field Validation - https://gallery.fastht.ml/dynamic_user_interface/inline_validation/display
+Progress Bar - https://gallery.fastht.ml/widgets/progress_bar/display

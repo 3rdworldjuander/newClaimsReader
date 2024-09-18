@@ -7,6 +7,7 @@ import sys
 import io
 import pandas as pd
 from dotenv import load_dotenv
+from rich import print
 
 # Configuration
 config = {
@@ -78,36 +79,57 @@ def convert(pdf_file_path):
     # find a better way to handle this without relying on '/' split
     base_name = pdf_file_path.split('/')[1].split('.')[0]
 
-    # Analyze doc with Azure DocInt
-    result = analyze_document(document_analysis_client, pdf_file_path, model_id)
-    result_json = result.to_dict()
+    ### ANALYSIS STARTS HERE ###
 
-    # Extract tables
-    tables = result_json['tables']
+    # # Analyze doc with Azure DocInt
+    # result = analyze_document(document_analysis_client, pdf_file_path, model_id)
+    # result_json = result.to_dict()
 
-    tables_json = {"tables": tables}
-    print(tables_json)
+    # # Extract tables
+    # tables = result_json['tables']
 
-    # Setting up Claude
-    client = init_claude_client(claude_api_key)
-    response_content = get_claude_response(client, tables_json)
-    what_is_this = response_content[0].text.strip()
-    print(type(what_is_this))
-    print(what_is_this)
+    # tables_json = {"tables": tables}
+    # print(tables_json)
 
-    # Save the CSV data to a file
+    # # Setting up Claude
+    # client = init_claude_client(claude_api_key)
+    # response_content = get_claude_response(client, tables_json)
+    # what_is_this = response_content[0].text.strip()
+    # print(type(what_is_this))
+    # print(what_is_this)
 
-    output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
-    with open(output_file, 'w') as file:
-        file.write(what_is_this)
+    # # Save the CSV data to a file
+
+    # output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
+    # with open(output_file, 'w') as file:
+    #     file.write(what_is_this)
         
-    print(f"CSV data has been saved to {output_file}")
+    # print(f"CSV data has been saved to {output_file}")
 
-    df = pd.read_csv(io.StringIO(what_is_this))
-    service_auth = df['Service Auth'].unique()
-    service_auth_str = str(int(service_auth))
-    print(type(service_auth_str))
-    print(f'Service Authorization No: {service_auth_str}')
+    # df = pd.read_csv(io.StringIO(what_is_this))
+    # service_auth = df['Service Auth'].unique()
+    # service_auth_str = str(int(service_auth))
+    # print(type(service_auth_str))
+    # print(f'Service Authorization No: {service_auth_str}')
+
+    ### ANALYSIS ENDS HERE ###
+
+    ### DUMMY DATA FOR TESTING ###
+    df = pd.DataFrame({
+        'Service Date': ['09/09/2024', '09/09/2024', '09/10/2024', '09/10/2024', '09/11/2024',
+        '09/11/2024', '09/12/2024', '09/12/2024', '09/13/2024', '09/13/2024'],
+        'Start Time': ['9:17 AM', '10:18 AM', '9:15 AM', '10:16 AM', '9:15 AM',
+        '10:16 AM', '9:10 AM', '10:11 AM', '9:10 AM', '10:11 AM'],
+        'End Time': ['10:17 AM', '11:18 AM', '10:15 AM', '11:16 AM', '10:15 AM',
+        '11:16 AM', '10:10 AM', '11:11 AM', '10:10 AM', '11:11 AM'],
+        'Service Auth': ['12510932', '12510932', '12510932', '12510932', '12510932',
+        '12510932', '12510932', '12510932', '12510932', '12510932']
+        })
+    service_auth_str = '12510932'
+
+    ### END OF DUMMY DATA FOR TESTING ###
+
+    print(df)
 
     return df, service_auth_str
 
