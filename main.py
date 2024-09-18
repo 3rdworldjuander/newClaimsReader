@@ -52,11 +52,11 @@ async def handle_classify(pdf_file:UploadFile):
                     Embed(
                         src=f"/uploads/{pdf_file.filename}", 
                         type='application/pdf',
-
-                        style="width: 150%; height: 150%;  scale(0.66); transform-origin: top center;"
+                        # style="width: 150%; height: 150%;  scale(0.66); transform-origin: top center;"  ### THIS WORKS
+                        style="width: 100%; padding-bottom: 75%; transform: rotate(-90deg); transform-origin: center ;"   ### THIS IS ALMOST PERFECT
                     ),
-                    style="width: 100%; aspect-ratio: 1/1.4; display: flex; justify-content: center; align-items: center; overflow: hidden;"
-                    # style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: flex-start; overflow: hidden;"
+                    # style="width: 100%; aspect-ratio: 1/1.4; display: flex; justify-content: center; align-items: center; overflow: hidden;"  ### THIS WORKS
+                    style="width: 100%; overflow: hidden;"   ### THIS IS PERFECT
                 ),
                 style="display: flex; flex-direction: column; align-items: center;"
                 # style="display: flex; flex-direction: column; align-items: center; height: 100%;"
