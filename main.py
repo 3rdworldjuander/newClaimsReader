@@ -19,6 +19,7 @@ os.makedirs("claude", exist_ok=True)
 def home():
     return Title("Service Log Converter"), Titled(
         H1("FastHTML based Service Log Converter"),
+        P("This web application extracts data from the claims form for use in NYEIS/EI-Hub claims processing."),
 
     Group(
         Input(type="file", name="pdf_file", accept=".pdf", required=True),

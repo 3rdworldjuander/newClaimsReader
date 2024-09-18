@@ -1,3 +1,4 @@
+Prompt:
 You are a data analyst. You will be provided with a json file. The Json file has a table with column identifiers as "Date of Service", "Start Time", "End Time" '
 the first column is a date column with dates in the MM/DD/YYYY format and the other two columns '
 are time in 12-hour formats. The data is captured via OCR which means that there could be '
@@ -15,4 +16,3 @@ PDF Embed - https://gallery.fastht.ml/widgets/pdf/display
 CSV Uploader - https://gallery.fastht.ml/start_simple/csv_editor/app/
 Inline Field Validation - https://gallery.fastht.ml/dynamic_user_interface/inline_validation/display
 Progress Bar - https://gallery.fastht.ml/widgets/progress_bar/display
-CSV Uploader/Editor - https://gallery.fastht.ml/start_simple/csv_editor/app/
