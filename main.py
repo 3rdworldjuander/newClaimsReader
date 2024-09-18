@@ -17,21 +17,20 @@ os.makedirs("claude", exist_ok=True)
 
 @app.get("/")
 def home():
-    return Title("Service Log Converter"), Main(
+    return Title("Service Log Converter"), Titled(
         H1("FastHTML based Service Log Converter"),
 
-        Form(
-            Input(type="file", name="pdf_file", accept=".pdf", required=True),
-            Button("Convert"),
-            hx_post="/convert",
-            enctype="multipart/form-data",
-            hx_target="#result"
-        ),
-        Br(), 
-        
-        Div(id="result"), 
-        cls="container"
-    )
+    Group(
+        Input(type="file", name="pdf_file", accept=".pdf", required=True),
+        Button("Convert", 
+               hx_post="/convert",
+               hx_target="#result",
+               hx_encoding="multipart/form-data",
+               hx_include='previous input'),
+    ),
+    Br(),
+    Div(id="result")
+)
 
 @app.post("/convert")
 async def handle_classify(pdf_file:UploadFile):

@@ -15,3 +15,4 @@ PDF Embed - https://gallery.fastht.ml/widgets/pdf/display
 CSV Uploader - https://gallery.fastht.ml/start_simple/csv_editor/app/
 Inline Field Validation - https://gallery.fastht.ml/dynamic_user_interface/inline_validation/display
 Progress Bar - https://gallery.fastht.ml/widgets/progress_bar/display
+CSV Uploader/Editor - https://gallery.fastht.ml/start_simple/csv_editor/app/
