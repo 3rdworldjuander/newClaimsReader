@@ -19,6 +19,8 @@ os.makedirs("claude", exist_ok=True)
 def home():
     return Title("Service Log Converter"), Main(
         H1("FastHTML based Service Log Converter"),
+        H2("Description and Instructions"),
+        
         Form(
             Input(type="file", name="pdf_file", accept=".pdf", required=True),
             Button("Convert"),
