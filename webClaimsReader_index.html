@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Claims Reader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="header-container">
+        <h1 class="heading-index-h1">Claims Reader</h1>
+        <form action="{{ url_for('logout') }}" method="POST" class="logout-form">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+    <h2 class="heading-index-h2">Description and Instructions</h2>
+    <p class="description">
+        This web application extracts data from the claims form for use in NYEIS claims processing. 
+    </p>
+    <ol class="instructions">
+        <li>Click the "Choose File" button to upload your PDF document.</li>
+        <li>Click "Upload and Process" to start extracting data from the PDF.</li>
+        <li>The PDF will be displayed on the left side, and the extracted CSV data will be shown on the right side.</li>
+        <li>You can edit the CSV content directly in the table cells if needed.</li>
+        <li>Once the data matches, click the "Save CSV" button to download the edited CSV file.</li>
+    </ol>
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload and Process">
+    </form>
+
+    <!-- Add this inside your existing HTML body where appropriate -->
+    <progress id="fileProgress" value="0" max="100" style="width:100%;"></progress>
+    <script>
+        function updateProgress(value) {
+            const progressBar = document.getElementById('fileProgress');
+            progressBar.value = value;
+        }
+    </script>
+
+
+    <!-- Button to view files -->
+    <a href="{{ url_for('list_files') }}" class="btn btn-primary">View Processed Files</a>
+
+
+    {% if filename and csv_html %}
+    <h3> Displaying: {{ filename }}</h3>
+    <div class="container">
+        <iframe src="{{ url_for('uploaded_file', filename=filename) }}"></iframe>
+        <div class="csv-wrapper">
+            <div id="top-csv-container">
+                {{ top_html|safe }}
+            </div>
+            <div id="csv-container">
+                {{ csv_html|safe }}
+            </div>
+        </div>
+        
+    </div>
+    <div class="bottom_container">
+    <button onclick="saveCSV('{{ final_csv_filename }}')" class="save-csv-button">Save CSV</button>
+    </div>
+    {% endif %}
+
+    <script>
+        function saveCSV(filename) {
+            // let table = document.querySelector('#csv-container table');
+            // let rows = table.rows;
+            // let csvContent = '';
+
+            // for (let i = 0; i < rows.length; i++) {
+            //     let cells = rows[i].cells;
+            //     let rowContent = [];
+            //     for (let j = 0; j < cells.length; j++) {
+            //         rowContent.push(cells[j].innerText);
+            //     }
+            //     csvContent += rowContent.join(',') + '\n';
+            // }
+            let tables = document.querySelectorAll('.container table');
+            let csvContent = '';
+
+            tables.forEach(table => {
+                let rows = table.rows;
+                for (let i = 0; i < rows.length; i++) {
+                    let cells = rows[i].cells;
+                    let rowContent = [];
+                    for (let j = 0; j < cells.length; j++) {
+                        rowContent.push(cells[j].innerText);
+                    }
+                    csvContent += rowContent.join(',') + '\n';
+                }
+            });
+
+
+
+            // Sending the CSV content to the server
+            fetch('/save_csv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    filename: filename,
+                    csv_data: csvContent
+                })
+            })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error('Error:', error));
+
+
+            // code to trigger the download
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        // Make table cells editable
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // let table = document.querySelector('#csv-container table'); 
+            // let cells = table.getElementsByTagName('td');
+            // for (let i = 0; i < cells.length; i++) {
+            //     cells[i].contentEditable = 'true';
+            document.querySelectorAll('.container table td').forEach(cell => {
+                cell.contentEditable = 'true';
+            });
+        });
+    </script>
+</body>
+</html>
