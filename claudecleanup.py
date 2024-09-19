@@ -66,7 +66,6 @@ def analyze_document(document_analysis_client, file_path, model_id):
         poller = document_analysis_client.begin_analyze_document(
         model_id
         , document=f
-        # , content_type="application/json"
         )
     return poller.result()
 

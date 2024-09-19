@@ -5,6 +5,11 @@ from starlette.responses import FileResponse
 from starlette.datastructures import UploadFile
 from claudecleanup import *
 from typing import List
+from uuid import uuid4
+
+### DB experiment ###
+db = database('sqlite.db')
+### End DB Experiment
 
 ### Experimental Row Render
 hdrs = (Style('''
@@ -15,6 +20,7 @@ button,input { margin: 0 1rem; }
 
 app, rt = fast_app(hdrs=hdrs)
 ### End of Experimental Row Render
+
 # app = FastHTML(hdrs=(picolink,))
 
 # Ensure the uploads directory exists
@@ -22,11 +28,10 @@ os.makedirs("uploads", exist_ok=True)
 # Ensure the claude directory exists
 os.makedirs("claude", exist_ok=True)
 
-# # Your image classification function goes here:
-# def convert(pdf_file_path): return f"not hotdog!"
 
 @app.get("/")
-def home():
+def home(sess):
+    if 'id' not in sess: sess['id'] = str(uuid4())
     return Title("Service Log Converter"), Titled(
         H1("FastHTML based Service Log Converter"),
         P("This web application extracts data from the claims form for use in NYEIS/EI-Hub claims processing."),
@@ -38,6 +43,9 @@ def home():
                hx_target="#result",
                hx_encoding="multipart/form-data",
                hx_include='previous input'),
+        ### DB experiment ###
+        A('Download', href='download', type="button")
+        ### End DB Experiment
     ),
     Br(),
     Div(id="result")
@@ -48,16 +56,30 @@ def render_dataframe(df: pd.DataFrame) -> List:
     rows = []
     for _, row in df.iterrows():
         vals = [Td(Input(value=str(v), name=k, oninput="this.classList.add('edited')")) for k, v in row.items()]
-        # vals.append(Td(Group(
-        #     Button('update', hx_post='update', hx_include="closest tr")
-        # )))
+        vals.append(Td(
+            Button('update', hx_post='update', hx_include="closest tr")
+            , style="width: 90px; align-items: right;" 
+        ))
         rows.append(Tr(*vals, hx_target='closest tr', hx_swap='outerHTML'))
     return rows
 
 def render_single_value(key, value):
     return Td(Input(value=str(value), name=key, oninput="this.classList.add('edited')"))
-
 ### End of Experimantal Row Render
+
+### DB experiment ###
+@rt
+def download(sess):
+    tbl = db[sess['id']]
+    csv_data = [",".join(map(str, tbl.columns_dict))]
+    csv_data += [",".join(map(str, row.values())) for row in tbl()]
+    headers = {'Content-Disposition': 'attachment; filename="data.csv"'}
+    return Response("\n".join(csv_data), media_type="text/csv", headers=headers)
+
+@rt('/update')
+def post(d:dict, sess): return render_dataframe(db[sess['id']].update(d))
+
+### End DB Experiment
 
 
 @app.post("/convert")
@@ -78,11 +100,9 @@ async def handle_classify(pdf_file:UploadFile):
     result = Table(Thead(Tr(*[Th(col) for col in result_first_3.columns])), Tbody(*result_rows))
 
     service_auth = render_single_value('Service Auth', service_auth_df)
-
     ### End of Experimantal Row Render
 
     return Div(
-        # P(f'Converting {pdf_file.filename}'),
         Div(
             Div(
                 Strong(f'Converting {pdf_file.filename}'),
