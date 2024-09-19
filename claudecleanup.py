@@ -70,6 +70,8 @@ def analyze_document(document_analysis_client, file_path, model_id):
         )
     return poller.result()
 
+
+
 def convert(pdf_file_path):
     azu_endpoint, azu_key, claude_api_key = load_env_variables()
     model_id = "prebuilt-layout"
@@ -115,21 +117,20 @@ def convert(pdf_file_path):
     ### ANALYSIS ENDS HERE ###
 
     ### DUMMY DATA FOR TESTING ###
-    df = pd.DataFrame({
-        'Service Date': ['09/09/2024', '09/09/2024', '09/10/2024', '09/10/2024', '09/11/2024',
-        '09/11/2024', '09/12/2024', '09/12/2024', '09/13/2024', '09/13/2024'],
-        'Start Time': ['9:17 AM', '10:18 AM', '9:15 AM', '10:16 AM', '9:15 AM',
-        '10:16 AM', '9:10 AM', '10:11 AM', '9:10 AM', '10:11 AM'],
-        'End Time': ['10:17 AM', '11:18 AM', '10:15 AM', '11:16 AM', '10:15 AM',
-        '11:16 AM', '10:10 AM', '11:11 AM', '10:10 AM', '11:11 AM'],
-        'Service Auth': ['12510932', '12510932', '12510932', '12510932', '12510932',
-        '12510932', '12510932', '12510932', '12510932', '12510932']
-        })
-    service_auth_str = '12510932'
+
+    csv_file_path = "claude/20240916120327_001_claude_output.csv"
+
+    df = pd.read_csv(csv_file_path)
+    service_auth_str = df['Service Auth'].unique()[0]
+
+    # with open(csv_file_path, 'r') as file:
+    #     df = file.read()
+    # service_auth_str = '12510932'
 
     ### END OF DUMMY DATA FOR TESTING ###
 
     print(df)
+    print(service_auth_str)
 
     return df, service_auth_str
 

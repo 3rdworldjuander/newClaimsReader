@@ -16,3 +16,33 @@ PDF Embed - https://gallery.fastht.ml/widgets/pdf/display
 CSV Uploader - https://gallery.fastht.ml/start_simple/csv_editor/app/
 Inline Field Validation - https://gallery.fastht.ml/dynamic_user_interface/inline_validation/display
 Progress Bar - https://gallery.fastht.ml/widgets/progress_bar/display
+
+
+
+df-to-db
+import pandas as pd
+from sqlalchemy import create_engine
+from io import StringIO
+
+# Assume we have the CSV content in a string
+csv_content = """Service Date,Start Time,End Time,Service Auth
+09/09/2024,9:17 AM,10:17 AM,12510932
+09/09/2024,10:18 AM,11:18 AM,12510932
+09/10/2024,9:15 AM,10:15 AM,12510932
+09/10/2024,10:16 AM,11:16 AM,12510932
+09/11/2024,9:15 AM,10:15 AM,12510932
+09/11/2024,10:16 AM,11:16 AM,12510932
+09/12/2024,9:10 AM,10:10 AM,12510932
+09/12/2024,10:11 AM,11:11 AM,12510932
+09/13/2024,9:10 AM,10:15 AM,12510932
+09/13/2024,10:11 AM,11:11 AM,12510932"""
+
+# Convert CSV string to DataFrame
+df = pd.read_csv(StringIO(csv_content))
+
+# Create a database engine
+# Replace 'sqlite:///your_database.db' with your actual database connection string
+engine = create_engine('sqlite:///your_database.db')
+
+# Insert the DataFrame into the database
+df.to_sql('your_table_name', engine, if_exists='append', index=False)

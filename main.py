@@ -4,8 +4,18 @@ import os, uvicorn
 from starlette.responses import FileResponse
 from starlette.datastructures import UploadFile
 from claudecleanup import *
+from typing import List
 
-app = FastHTML(hdrs=(picolink,))
+### Experimental Row Render
+hdrs = (Style('''
+button,input { margin: 0 1rem; }
+[role="group"] { border: 1px solid #ccc; }
+.edited { outline: 2px solid orange; }
+'''), )
+
+app, rt = fast_app(hdrs=hdrs)
+### End of Experimental Row Render
+# app = FastHTML(hdrs=(picolink,))
 
 # Ensure the uploads directory exists
 os.makedirs("uploads", exist_ok=True)
@@ -33,6 +43,23 @@ def home():
     Div(id="result")
 )
 
+### Experimental Row Render
+def render_dataframe(df: pd.DataFrame) -> List:
+    rows = []
+    for _, row in df.iterrows():
+        vals = [Td(Input(value=str(v), name=k, oninput="this.classList.add('edited')")) for k, v in row.items()]
+        # vals.append(Td(Group(
+        #     Button('update', hx_post='update', hx_include="closest tr")
+        # )))
+        rows.append(Tr(*vals, hx_target='closest tr', hx_swap='outerHTML'))
+    return rows
+
+def render_single_value(key, value):
+    return Td(Input(value=str(value), name=key, oninput="this.classList.add('edited')"))
+
+### End of Experimantal Row Render
+
+
 @app.post("/convert")
 async def handle_classify(pdf_file:UploadFile):
     
@@ -42,8 +69,18 @@ async def handle_classify(pdf_file:UploadFile):
         f.write(await pdf_file.read())
     
     # Classify the pdf_file (dummy function for this example)
-    result, service_auth = convert(pdf_file_path)
-    
+    result_df, service_auth_df = convert(pdf_file_path)
+
+    ### Experimental Row Render
+    result_first_3 = result_df.iloc[:, :3]
+    print(result_first_3)
+    result_rows = render_dataframe(result_first_3)
+    result = Table(Thead(Tr(*[Th(col) for col in result_first_3.columns])), Tbody(*result_rows))
+
+    service_auth = render_single_value('Service Auth', service_auth_df)
+
+    ### End of Experimantal Row Render
+
     return Div(
         # P(f'Converting {pdf_file.filename}'),
         Div(
@@ -63,7 +100,12 @@ async def handle_classify(pdf_file:UploadFile):
                 # style="display: flex; flex-direction: column; align-items: center; height: 100%;"
             ),
             Div(
-                Strong(f'Service Authorization No:{service_auth}'),
+                Group(
+                    Div(
+                        Strong(f'Service Authorization No:'),
+                        style="display: flex; align-items: center; justify-content: center;"                        
+                        ),
+                    Div(service_auth)),
                 Div(result),
                 style="overflow: auto;"
             ),
