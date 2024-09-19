@@ -80,7 +80,7 @@ def convert(pdf_file_path):
     # find a better way to handle this without relying on '/' split
     base_name = pdf_file_path.split('/')[1].split('.')[0]
 
-    ### ANALYSIS STARTS HERE ###
+    # ## ANALYSIS STARTS HERE ###
 
     # # Analyze doc with Azure DocInt
     # result = analyze_document(document_analysis_client, pdf_file_path, model_id)
@@ -113,7 +113,7 @@ def convert(pdf_file_path):
     # print(type(service_auth_str))
     # print(f'Service Authorization No: {service_auth_str}')
 
-    ### ANALYSIS ENDS HERE ###
+    # ## ANALYSIS ENDS HERE ###
 
     ### DUMMY DATA FOR TESTING ###
 
