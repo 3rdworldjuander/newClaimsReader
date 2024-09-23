@@ -80,53 +80,53 @@ def convert(pdf_file_path):
     # find a better way to handle this without relying on '/' split
     base_name = pdf_file_path.split('/')[1].split('.')[0]
 
-    # ## ANALYSIS STARTS HERE ###
+    ## ANALYSIS STARTS HERE ###
 
-    # # Analyze doc with Azure DocInt
-    # result = analyze_document(document_analysis_client, pdf_file_path, model_id)
-    # result_json = result.to_dict()
+    # Analyze doc with Azure DocInt
+    result = analyze_document(document_analysis_client, pdf_file_path, model_id)
+    result_json = result.to_dict()
 
-    # # Extract tables
-    # tables = result_json['tables']
+    # Extract tables
+    tables = result_json['tables']
 
-    # tables_json = {"tables": tables}
-    # print(tables_json)
+    tables_json = {"tables": tables}
+    print(tables_json)
 
-    # # Setting up Claude
-    # client = init_claude_client(claude_api_key)
-    # response_content = get_claude_response(client, tables_json)
-    # what_is_this = response_content[0].text.strip()
-    # print(type(what_is_this))
-    # print(what_is_this)
+    # Setting up Claude
+    client = init_claude_client(claude_api_key)
+    response_content = get_claude_response(client, tables_json)
+    what_is_this = response_content[0].text.strip()
+    print(type(what_is_this))
+    print(what_is_this)
 
-    # # Save the CSV data to a file
+    # Save the CSV data to a file
 
-    # output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
-    # with open(output_file, 'w') as file:
-    #     file.write(what_is_this)
+    output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
+    with open(output_file, 'w') as file:
+        file.write(what_is_this)
         
-    # print(f"CSV data has been saved to {output_file}")
+    print(f"CSV data has been saved to {output_file}")
 
-    # df = pd.read_csv(io.StringIO(what_is_this))
-    # service_auth = df['Service Auth'].unique()
-    # service_auth_str = str(int(service_auth))
-    # print(type(service_auth_str))
-    # print(f'Service Authorization No: {service_auth_str}')
+    df = pd.read_csv(io.StringIO(what_is_this))
+    service_auth = df['Service Auth'].unique()
+    service_auth_str = str(int(service_auth))
+    print(type(service_auth_str))
+    print(f'Service Authorization No: {service_auth_str}')
 
-    # ## ANALYSIS ENDS HERE ###
+    ## ANALYSIS ENDS HERE ###
 
-    ### DUMMY DATA FOR TESTING ###
+    # ### DUMMY DATA FOR TESTING ###
 
-    csv_file_path = "claude/20240916120327_001_claude_output.csv"
+    # csv_file_path = "claude/20240916120327_001_claude_output.csv"
 
-    df = pd.read_csv(csv_file_path)
-    service_auth_str = df['Service Auth'].unique()[0]
+    # df = pd.read_csv(csv_file_path)
+    # service_auth_str = df['Service Auth'].unique()[0]
 
-    # with open(csv_file_path, 'r') as file:
-    #     df = file.read()
-    # service_auth_str = '12510932'
+    # # with open(csv_file_path, 'r') as file:
+    # #     df = file.read()
+    # # service_auth_str = '12510932'
 
-    ### END OF DUMMY DATA FOR TESTING ###
+    # ### END OF DUMMY DATA FOR TESTING ###
 
     print(df)
     print(service_auth_str)

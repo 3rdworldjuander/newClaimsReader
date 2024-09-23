@@ -21,13 +21,10 @@ button,input { margin: 0 1rem; }
 app, rt = fast_app(hdrs=hdrs)
 ### End of Experimental Row Render
 
-# app = FastHTML(hdrs=(picolink,))
-
 # Ensure the uploads directory exists
 os.makedirs("uploads", exist_ok=True)
 # Ensure the claude directory exists
 os.makedirs("claude", exist_ok=True)
-
 
 @app.get("/")
 def home(sess):
@@ -44,10 +41,10 @@ def home(sess):
                hx_encoding="multipart/form-data",
                hx_include='previous input'),
         ### DB experiment ###
-        A('Download', href='download', type="button")
+        # A('Download', href='download', type="button")
         ### End DB Experiment
     ),
-    Br(),
+    Div(id='progress_bar'),
     Div(id="result")
 )
 
@@ -56,10 +53,10 @@ def render_dataframe(df: pd.DataFrame) -> List:
     rows = []
     for _, row in df.iterrows():
         vals = [Td(Input(value=str(v), name=k, oninput="this.classList.add('edited')")) for k, v in row.items()]
-        vals.append(Td(
-            Button('update', hx_post='update', hx_include="closest tr")
-            , style="width: 90px; align-items: right;" 
-        ))
+        # vals.append(Td(
+        #     Button('update', hx_post='update', hx_include="closest tr")
+        #     , style="width: 90px; align-items: right;" 
+        # ))
         rows.append(Tr(*vals, hx_target='closest tr', hx_swap='outerHTML'))
     return rows
 
@@ -76,15 +73,11 @@ def download(sess):
     headers = {'Content-Disposition': 'attachment; filename="data.csv"'}
     return Response("\n".join(csv_data), media_type="text/csv", headers=headers)
 
-@rt('/update')
-def post(d:dict, sess): return render_dataframe(db[sess['id']].update(d))
-
 ### End DB Experiment
 
 
 @app.post("/convert")
-async def handle_classify(pdf_file:UploadFile):
-    
+async def handle_classify(pdf_file:UploadFile): 
     # Save the uploaded pdf_file
     pdf_file_path = f"uploads/{pdf_file.filename}"
     with open(pdf_file_path, "wb") as f:
