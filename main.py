@@ -27,8 +27,9 @@ os.makedirs("uploads", exist_ok=True)
 os.makedirs("claude", exist_ok=True)
 
 @app.get("/")
-def home(sess):
+def homepage(sess):
     if 'id' not in sess: sess['id'] = str(uuid4())
+    print(f'Session ID is{sess}')
     return Title("Service Log Converter"), Titled(
         H1("FastHTML based Service Log Converter"),
         P("This web application extracts data from the claims form for use in NYEIS/EI-Hub claims processing."),
@@ -41,7 +42,7 @@ def home(sess):
                hx_encoding="multipart/form-data",
                hx_include='previous input'),
         ### DB experiment ###
-        # A('Download', href='download', type="button")
+        A('Download', href='download', type="button")
         ### End DB Experiment
     ),
     Div(id='progress_bar'),
@@ -49,6 +50,12 @@ def home(sess):
 )
 
 ### Experimental Row Render
+def render_row(row):
+    vals = [Td(Input(value=v, name=k, oninput="this.classList.add('edited')")) for k,v in row.items()]
+    vals.append(Td(Group(
+                   Button('update', hx_post='update', hx_include="closest tr"))))
+    return Tr(*vals, hx_target='closest tr', hx_swap='outerHTML')
+
 def render_dataframe(df: pd.DataFrame) -> List:
     rows = []
     for _, row in df.iterrows():
@@ -73,11 +80,15 @@ def download(sess):
     headers = {'Content-Disposition': 'attachment; filename="data.csv"'}
     return Response("\n".join(csv_data), media_type="text/csv", headers=headers)
 
+@rt('/update')
+def post(d:dict, sess): return render_row(db[sess['id']].update(d))
+
+
 ### End DB Experiment
 
 
 @app.post("/convert")
-async def handle_classify(pdf_file:UploadFile): 
+async def handle_classify(pdf_file:UploadFile, sess): 
     # Save the uploaded pdf_file
     pdf_file_path = f"uploads/{pdf_file.filename}"
     with open(pdf_file_path, "wb") as f:
@@ -86,14 +97,25 @@ async def handle_classify(pdf_file:UploadFile):
     # Classify the pdf_file (dummy function for this example)
     result_df, service_auth_df = convert(pdf_file_path)
 
-    ### Experimental Row Render
-    result_first_3 = result_df.iloc[:, :3]
-    print(result_first_3)
-    result_rows = render_dataframe(result_first_3)
-    result = Table(Thead(Tr(*[Th(col) for col in result_first_3.columns])), Tbody(*result_rows))
+    db[sess['id']].drop(ignore=True)
+    for _, row in result_df.iterrows():
+        row_dict = row.to_dict()
+        print(row_dict)
+        db[sess['id']].insert(row_dict, pk='id')
+        # db[sess['id']](**row_dict)   
+
+    header = Tr(*map(Th, db[sess['id']].columns_dict))
+    vals = [render_row(row) for row in db[sess['id']]()]
+    result =  Table(Thead(header), Tbody(*vals))
+
+    # ### Experimental Row Render
+    # result_first_3 = result_df.iloc[:, :3]
+    # print(result_first_3)
+    # result_rows = render_dataframe(result_first_3)
+    # result = Table(Thead(Tr(*[Th(col) for col in result_first_3.columns])), Tbody(*result_rows))
 
     service_auth = render_single_value('Service Auth', service_auth_df)
-    ### End of Experimantal Row Render
+    # ### End of Experimantal Row Render
 
     return Div(
         Div(
