@@ -6,3 +6,6 @@
 
 *.db
 *.pyc
+
+sqlite.db-shm
+sqlite.db-wal
