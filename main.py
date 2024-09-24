@@ -51,20 +51,28 @@ def homepage(sess):
 
 ### Experimental Row Render
 def render_row(row):
-    vals = [Td(Input(value=v, name=k, oninput="this.classList.add('edited')")) for k,v in row.items()]
+    vals = [Td(Input(value=v, name=k, 
+                     oninput="this.classList.add('edited')",
+                     style = "font-size: 0.8em; padding: 2px; margin: 0; width: 95%;",),
+                     style = "padding: 2px;") for k,v in row.items()]
     vals.append(Td(Group(
-                   Button('update', hx_post='update', hx_include="closest tr"))))
-    return Tr(*vals, hx_target='closest tr', hx_swap='outerHTML')
+                   Button('update', hx_post='update', hx_include="closest tr",
+                          style="font-size: 0.8em; padding: 2px;")),
+                          style = "padding: 2px;"))
+    return Tr(*vals, hx_target='closest tr', hx_swap='outerHTML', style="line-height: 1;")
 
 def render_dataframe(df: pd.DataFrame) -> List:
     rows = []
     for _, row in df.iterrows():
-        vals = [Td(Input(value=str(v), name=k, oninput="this.classList.add('edited')")) for k, v in row.items()]
-        # vals.append(Td(
-        #     Button('update', hx_post='update', hx_include="closest tr")
-        #     , style="width: 90px; align-items: right;" 
-        # ))
-        rows.append(Tr(*vals, hx_target='closest tr', hx_swap='outerHTML'))
+        vals = [Td(Input(value=str(v), name=k, 
+                         oninput="this.classList.add('edited')",
+                         style = "font-size: 0.8em; padding: 2px; margin: 0; width: 95%;",),
+                         style = "padding: 2px;") for k, v in row.items()]
+        vals.append(Td(
+            Button('update', hx_post='update', hx_include="closest tr",
+                   style="font-size: 0.8em; padding: 2px;")),
+                   style="font-size: 0.8em; padding: 2px;")
+        rows.append(Tr(*vals, hx_target='closest tr', hx_swap='outerHTML', style="line-height: 1;"))
     return rows
 
 def render_single_value(key, value):
@@ -135,12 +143,12 @@ async def handle_classify(pdf_file:UploadFile, sess):
                 # style="display: flex; flex-direction: column; align-items: center; height: 100%;"
             ),
             Div(
-                Group(
-                    Div(
-                        Strong(f'Service Authorization No:'),
-                        style="display: flex; align-items: center; justify-content: center;"                        
-                        ),
-                    Div(service_auth)),
+                # Group(
+                #     Div(
+                #         Strong(f'Service Authorization No:'),
+                #         style="display: flex; align-items: center; justify-content: center;"                        
+                #         ),
+                #     Div(service_auth)),
                 Div(result),
                 style="overflow: auto;"
             ),
