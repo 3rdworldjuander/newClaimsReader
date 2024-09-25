@@ -107,7 +107,8 @@ async def handle_classify(pdf_file:UploadFile, sess):
                         Strong(f'Service Authorization No:'),
                         style="display: flex; align-items: center; justify-content: center;"
                     ),
-                    Div(service_auth, id="service-auth")
+                    Div(service_auth, id="service-auth"),
+                    style="overflow: auto;"
                 ),
                 Div(result, id="result"),
                 style="overflow: auto;"
