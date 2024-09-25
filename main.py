@@ -6,10 +6,7 @@ from starlette.datastructures import UploadFile
 from claudecleanup import *
 from typing import List
 from uuid import uuid4
-
-### DB experiment ###
-db = database('sqlite.db')
-### End DB Experiment
+import pandas as pd
 
 ### Experimental Row Render
 hdrs = (Style('''
@@ -41,26 +38,12 @@ def homepage(sess):
                hx_target="#result",
                hx_encoding="multipart/form-data",
                hx_include='previous input'),
-        ### DB experiment ###
-        A('Download', href='download', type="button")
-        ### End DB Experiment
     ),
     Div(id='progress_bar'),
     Div(id="result")
 )
 
 ### Experimental Row Render
-def render_row(row):
-    vals = [Td(Input(value=v, name=k, 
-                     oninput="this.classList.add('edited')",
-                     style = "font-size: 0.8em; padding: 2px; margin: 0; width: 95%;",),
-                     style = "padding: 2px;") for k,v in row.items()]
-    vals.append(Td(Group(
-                   Button('update', hx_post='update', hx_include="closest tr",
-                          style="font-size: 0.8em; padding: 2px;")),
-                          style = "padding: 2px;"))
-    return Tr(*vals, hx_target='closest tr', hx_swap='outerHTML', style="line-height: 1;")
-
 def render_dataframe(df: pd.DataFrame) -> List:
     rows = []
     for _, row in df.iterrows():
@@ -68,10 +51,6 @@ def render_dataframe(df: pd.DataFrame) -> List:
                          oninput="this.classList.add('edited')",
                          style = "font-size: 0.8em; padding: 2px; margin: 0; width: 95%;",),
                          style = "padding: 2px;") for k, v in row.items()]
-        vals.append(Td(
-            Button('update', hx_post='update', hx_include="closest tr",
-                   style="font-size: 0.8em; padding: 2px;")),
-                   style="font-size: 0.8em; padding: 2px;")
         rows.append(Tr(*vals, hx_target='closest tr', hx_swap='outerHTML', style="line-height: 1;"))
     return rows
 
@@ -80,20 +59,13 @@ def render_single_value(key, value):
 ### End of Experimantal Row Render
 
 ### DB experiment ###
-@rt
-def download(sess):
-    tbl = db[sess['id']]
-    csv_data = [",".join(map(str, tbl.columns_dict))]
-    csv_data += [",".join(map(str, row.values())) for row in tbl()]
-    headers = {'Content-Disposition': 'attachment; filename="data.csv"'}
-    return Response("\n".join(csv_data), media_type="text/csv", headers=headers)
-
-@rt('/update')
-def post(d:dict, sess): return render_row(db[sess['id']].update(d))
+@rt('/download')
+def post(d:dict):
+    print('Download Button hit')
+    print(d)
 
 
 ### End DB Experiment
-
 
 @app.post("/convert")
 async def handle_classify(pdf_file:UploadFile, sess): 
@@ -105,22 +77,11 @@ async def handle_classify(pdf_file:UploadFile, sess):
     # Classify the pdf_file (dummy function for this example)
     result_df, service_auth_df = convert(pdf_file_path)
 
-    db[sess['id']].drop(ignore=True)
-    for _, row in result_df.iterrows():
-        row_dict = row.to_dict()
-        print(row_dict)
-        db[sess['id']].insert(row_dict, pk='id')
-        # db[sess['id']](**row_dict)   
-
-    header = Tr(*map(Th, db[sess['id']].columns_dict))
-    vals = [render_row(row) for row in db[sess['id']]()]
-    result =  Table(Thead(header), Tbody(*vals))
-
-    # ### Experimental Row Render
-    # result_first_3 = result_df.iloc[:, :3]
-    # print(result_first_3)
-    # result_rows = render_dataframe(result_first_3)
-    # result = Table(Thead(Tr(*[Th(col) for col in result_first_3.columns])), Tbody(*result_rows))
+    ### Experimental Row Render
+    result_first_3 = result_df.iloc[:, :3]
+    print(result_first_3)
+    result_rows = render_dataframe(result_first_3)
+    result = Table(Thead(Tr(*[Th(col) for col in result_first_3.columns])), Tbody(*result_rows) , id="result-table" )
 
     service_auth = render_single_value('Service Auth', service_auth_df)
     # ### End of Experimantal Row Render
@@ -131,31 +92,34 @@ async def handle_classify(pdf_file:UploadFile, sess):
                 Strong(f'Converting {pdf_file.filename}'),
                 Div(
                     Embed(
-                        src=f"/uploads/{pdf_file.filename}", 
+                        src=f"/uploads/{pdf_file.filename}",
                         type='application/pdf',
-                        # style="width: 150%; height: 150%;  scale(0.66); transform-origin: top center;"  ### THIS WORKS
-                        style="width: 100%; height: 100%; padding-bottom: 75%; transform: rotate(-90deg); transform-origin: center ;"   ### THIS IS ALMOST PERFECT
+                        style="width: 100%; height: 100%; padding-bottom: 75%; transform: rotate(-90deg); transform-origin: center ;"
                     ),
-                    # style="width: 100%; aspect-ratio: 1/1.4; display: flex; justify-content: center; align-items: center; overflow: hidden;"  ### THIS WORKS
-                    style="width: 100%; display: flex; overflow: hidden;"   ### THIS IS PERFECT
+                    style="width: 100%; display: flex; overflow: hidden;"
                 ),
                 style="display: flex; flex-direction: column; align-items: center;"
-                # style="display: flex; flex-direction: column; align-items: center; height: 100%;"
             ),
             Div(
-                # Group(
-                #     Div(
-                #         Strong(f'Service Authorization No:'),
-                #         style="display: flex; align-items: center; justify-content: center;"                        
-                #         ),
-                #     Div(service_auth)),
-                Div(result),
+                Group(
+                    Div(
+                        Strong(f'Service Authorization No:'),
+                        style="display: flex; align-items: center; justify-content: center;"
+                    ),
+                    Div(service_auth, id="service-auth")
+                ),
+                Div(result, id="result"),
                 style="overflow: auto;"
             ),
-            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; height: 100vh;"
-            )
-        )
-
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; height: calc(100vh - 50px);"
+        ),
+        Div(
+            Button('Download', hx_target="#download_result", hx_post ='download', hx_include="#result-table, #service-auth"),
+            style="display: flex; justify-content: center; align-items: center; height: 50px;"
+        ),
+        Div(id="download_result"),
+        style="display: flex; flex-direction: column; height: 100vh;"
+    )
 
 @app.get("/uploads/{filename}")
 async def serve_upload(filename: str):
