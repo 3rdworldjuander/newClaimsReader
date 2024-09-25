@@ -46,3 +46,15 @@ engine = create_engine('sqlite:///your_database.db')
 
 # Insert the DataFrame into the database
 df.to_sql('your_table_name', engine, if_exists='append', index=False)
+
+Roadmap
+Use proper database
+Upload pdf -> Convert -> Queue for billing
+Once all pdf's are queued, go to queue
+Select all entries that you want to bill, there will be a table with checkboxes for selection.
+download the file
+(long term- interface this with EI-Hub entry directly)
+
+
+    columns = list(db[sess['id']].columns_dict.keys())      # ignore first and last column
+    header = Tr(*map(Th, columns[1:-1]))                    # ignore first and last column
