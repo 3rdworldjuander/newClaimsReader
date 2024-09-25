@@ -45,7 +45,7 @@ def get_claude_response(client, json):
               f'the second and third column, correct them by making sure that they follow the 12-hour time format. '
               f'Check the other rows to infer what dates and times should be written based on what was detected and the data in the other rows. '
               f'if there are any cells in the second or third column with nan, remove the whole row.  '
-              f'please return a csv table with just the columns "Service Date", "Start Time", "End Time". Create a fourth column with header "Service Auth" and enter the Service Authorization number in all the rows.'
+              f'please return a csv table with just the columns "Date of Service", "Start Time", "End Time". Create a fourth column with header "Service Auth" and enter the Service Authorization number in all the rows.'
               f'Just reply with the corrected csv table and nothing else.'
               f'Here is the table of service dates and times: {json}')
 
