@@ -59,9 +59,10 @@ def render_single_value(key, value):
 ### End of Experimantal Row Render
 
 ### DB experiment ###
-@rt('/download')
-def post(d:dict):
-    print('Download Button hit')
+@rt('/queue')
+def post(d:dict, sess):
+    print('Queue Button hit')
+    print(sess)
     print(d)
 
 
@@ -114,10 +115,10 @@ async def handle_classify(pdf_file:UploadFile, sess):
             style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; height: calc(100vh - 50px);"
         ),
         Div(
-            Button('Download', hx_target="#download_result", hx_post ='download', hx_include="#result-table, #service-auth"),
+            Button('Queue', hx_target="#queue_result", hx_post ='queue', hx_include="#result-table, #service-auth"),
             style="display: flex; justify-content: center; align-items: center; height: 50px;"
         ),
-        Div(id="download_result"),
+        Div(id="queue_result"),
         style="display: flex; flex-direction: column; height: 100vh;"
     )
 
