@@ -8,6 +8,7 @@ import io
 import pandas as pd
 from dotenv import load_dotenv
 from rich import print
+import json
 
 # Configuration
 config = {
@@ -27,9 +28,10 @@ def load_env_variables():
     azu_endpoint = os.environ.get("AZURE_DOCINT_URL")
     azu_key = os.environ.get("AZURE_DOCINT_KEY")
     claude_api_key = os.environ.get("CLAUDE_API_KEY")
+    prompt = os.environ.get("prompt")                       # Placeholder for when I want to hide my prompt
     if not claude_api_key or not azu_endpoint or not azu_key:
         raise ValueError("CLAUDE_API_KEY, AZURE_DOCINT_URL and AZURE_DOCINT_KEY must be set in the environment variables.")
-    return azu_endpoint, azu_key, claude_api_key
+    return azu_endpoint, azu_key, claude_api_key, prompt
 
 def init_claude_client(api_key):
     """Initialize the OpenAI client with the API key."""
@@ -69,10 +71,16 @@ def analyze_document(document_analysis_client, file_path, model_id):
         )
     return poller.result()
 
+### Useful tools ###
+def save_json_to_file(data, filename):
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=4)
 
+
+### End of Useful tools ###
 
 def convert(pdf_file_path):
-    azu_endpoint, azu_key, claude_api_key = load_env_variables()
+    azu_endpoint, azu_key, claude_api_key, claude_prompt = load_env_variables()
     model_id = "prebuilt-layout"
     document_analysis_client = DocumentAnalysisClient(endpoint=azu_endpoint, credential=AzureKeyCredential(azu_key))
 
@@ -80,53 +88,62 @@ def convert(pdf_file_path):
     # find a better way to handle this without relying on '/' split
     base_name = pdf_file_path.split('/')[1].split('.')[0]
 
-    # ### ANALYSIS STARTS HERE ###
+    ### ANALYSIS STARTS HERE ###
 
-    # # Analyze doc with Azure DocInt
-    # result = analyze_document(document_analysis_client, pdf_file_path, model_id)
-    # result_json = result.to_dict()
+    # Analyze doc with Azure DocInt
+    result = analyze_document(document_analysis_client, pdf_file_path, model_id)
+    result_json = result.to_dict()
 
-    # # Extract tables
-    # tables = result_json['tables']
+    # save_json_to_file(result_json, f"json/{base_name}full_result.json")     # Troubleshooting tools
 
-    # tables_json = {"tables": tables}
-    # print(tables_json)
+    # Extract tables
+    tables = result_json['tables']
 
-    # # Setting up Claude
-    # client = init_claude_client(claude_api_key)
-    # response_content = get_claude_response(client, tables_json)
-    # what_is_this = response_content[0].text.strip()
-    # print(type(what_is_this))
-    # print(what_is_this)
+    # save_json_to_file(tables, f"json/{base_name}tables.json")       # Troubleshooting tools
+    
+    tables_json = {"tables": tables}
+    print(tables_json)
 
-    # # Save the CSV data to a file
 
-    # output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
-    # with open(output_file, 'w') as file:
-    #     file.write(what_is_this)
+    ## Start of Claude Cleanup ##
+
+    # Setting up Claude
+    client = init_claude_client(claude_api_key)
+    response_content = get_claude_response(client, tables_json)
+    what_is_this = response_content[0].text.strip()
+    print(type(what_is_this))
+    print(what_is_this)
+
+    # Save the CSV data to a file
+
+    output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
+    with open(output_file, 'w') as file:
+        file.write(what_is_this)
         
-    # print(f"CSV data has been saved to {output_file}")
+    print(f"CSV data has been saved to {output_file}")
 
-    # df = pd.read_csv(io.StringIO(what_is_this))
-    # service_auth = df['Service Auth'].unique()
-    # service_auth_str = str(int(service_auth))
-    # print(type(service_auth_str))
-    # print(f'Service Authorization No: {service_auth_str}')
+    df = pd.read_csv(io.StringIO(what_is_this))
+    service_auth = df['Service Auth'].unique()
+    service_auth_str = str(int(service_auth))
+    print(type(service_auth_str))
+    print(f'Service Authorization No: {service_auth_str}')
 
-    # ### ANALYSIS ENDS HERE ###
+    ## End of Claude Cleanup ##
 
-    ### DUMMY DATA FOR TESTING ###
+    ## ANALYSIS ENDS HERE ###
 
-    csv_file_path = "claude/20240916120327_001_claude_output.csv"
+    # ### DUMMY DATA FOR TESTING ###
 
-    df = pd.read_csv(csv_file_path)
-    service_auth_str = df['Service Auth'].unique()[0]
+    # csv_file_path = "claude/20240916120327_001_claude_output.csv"
 
-    # with open(csv_file_path, 'r') as file:
-    #     df = file.read()
-    # service_auth_str = '12510932'
+    # df = pd.read_csv(csv_file_path)
+    # service_auth_str = df['Service Auth'].unique()[0]
 
-    ### END OF DUMMY DATA FOR TESTING ###
+    # # with open(csv_file_path, 'r') as file:
+    # #     df = file.read()
+    # # service_auth_str = '12510932'
+
+    # ### END OF DUMMY DATA FOR TESTING ###
 
     print(df)
     print(service_auth_str)

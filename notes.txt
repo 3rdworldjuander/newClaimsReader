@@ -58,3 +58,10 @@ download the file
 
     columns = list(db[sess['id']].columns_dict.keys())      # ignore first and last column
     header = Tr(*map(Th, columns[1:-1]))                    # ignore first and last column
+
+Fix Tables extraction to enable multi-page entries
+- iterate through all Tables
+- look for "Service Authorization" in cell contents
+    - if found, extract Service Authorization number
+- Look for "Date of Service" in cell contents,
+    - if found, extract full table

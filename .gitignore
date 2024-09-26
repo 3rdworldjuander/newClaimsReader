@@ -3,6 +3,9 @@
 /.sesskey
 /claude
 /uploads
+/json
+/pdf
+/tables
 
 *.db
 *.pyc
