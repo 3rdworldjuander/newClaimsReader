@@ -4,6 +4,7 @@ import os, uvicorn
 from starlette.responses import FileResponse
 from starlette.datastructures import UploadFile
 from claudecleanup import *
+from dict_to_db import *
 from typing import List
 from uuid import uuid4
 import pandas as pd
@@ -64,6 +65,8 @@ def post(d:dict, sess):
     print('Queue Button hit')
     print(sess)
     print(d)
+    db_result = import_service_data(d)
+    print(db_result)
 
 
 ### End DB Experiment
