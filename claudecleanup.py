@@ -75,8 +75,6 @@ def analyze_document(document_analysis_client, file_path, model_id):
 def save_json_to_file(data, filename):
     with open(filename, 'w') as file:
         json.dump(data, file, indent=4)
-
-
 ### End of Useful tools ###
 
 def convert(pdf_file_path):
