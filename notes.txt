@@ -65,3 +65,16 @@ Fix Tables extraction to enable multi-page entries
     - if found, extract Service Authorization number
 - Look for "Date of Service" in cell contents,
     - if found, extract full table
+
+    table_content string samples:
+    "Child's Name: Arabella Gavela Date of Birth: 2 / 10 / 2022 Child's EI#: 872959 Service Type: SI-ABA Service Authorization (one SA per page)#: 12510932"
+    "Service Type: Special Instruction Service Authorization (one SA per page)#: 12510932 Interventionist Name: Maria Campo Discipline: SLABA NPI #: 18415520234 Provider Agency Name:"
+    "Service Type: Special Instruction Service Authorization (one SA per page)#: 12510933 Interventionist Name: Maria Campo Discipline: SI-ABA NPI #: 18415520234 Provider Agency Name:"
+    "Service Type: SI-ABA Service Authorization (one SA per page)#: 12510932 Interventionist Name: Maria Campo Discipline: Special Instruction NPI #: 1841552023 Provider Agency Name:"
+    "null"
+    "Child's Name: Arabella Gavela Date of Birth: 2 / 10 /2022 Child's EI#: 872959 Service Type: Special Instruction Service Authorization (one SA per page)#: 12510933 Interventionist Name: Maria Campo Discipline: SI-ABA NPI #: 18415520234"
+    "Service Type: Special Instruction Service Authorization (one SA per page)#: 12510932 Interventionist Name: Maria Campo Discipline: SI-ABA NPI #: 18415520234 Provider Agency Name:"
+    "Child's Name: Arabella Gavela Date of Birth: 2 / 10 / 2022 Child's EI#: 872959 Service Type: SI-ABA Service Authorization (one SA per page)#: 12510932"
+    "Child's Name: Arabella Gavela Date of Birth: 2 / 10 / 2022 Child's EI#: 872959 Service Type: SI-ABA Service Authorization (one SA per page)#: 12510933"
+
+    Look at json to html

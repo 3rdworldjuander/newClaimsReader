@@ -1,13 +1,32 @@
 import json
 import sys
+import re
 from rich import print
+
+
+def extract_service_authorization(content):
+    if content is None or content.strip() == "":
+        return None
+    
+    # Try to find the full pattern
+    match = re.search(r"Service Authorization \(one SA per page\)#:\s*(\w+)", content)
+    if match:
+        return match.group(1)
+    
+    # If full pattern not found, look for just "Service Authorization" followed by alphanumeric
+    match = re.search(r"Service Authorization.*?(\w+)", content)
+    if match:
+        return match.group(1)
+    
+    # If no match found, return None
+    return None
 
 def process_azure_ocr_json(data):
     table_pairs = []
     current_pair = {"service_authorization": None, "date_of_service_table": None}
     
     for table in data:
-        print(f'table{table}')  # troubleshooting
+        # print(f'table{table}')  # troubleshooting
         table_content = ""
         has_date_of_service = False
         
@@ -22,6 +41,8 @@ def process_azure_ocr_json(data):
         
         # Check for "Service Authorization"
         if "Service Authorization" in table_content:
+            # Extract the Service Authorization number from table_content
+            table_content = extract_service_authorization(table_content)
             # If we already have a service authorization in the current pair, start a new pair
             if current_pair["service_authorization"] is not None:
                 table_pairs.append(current_pair)
