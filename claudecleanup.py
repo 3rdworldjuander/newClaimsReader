@@ -9,6 +9,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from rich import print
 import json
+from json_tables import *
 
 # Configuration
 config = {
@@ -40,16 +41,16 @@ def init_claude_client(api_key):
 def get_claude_response(client, json):
     """Get the corrected table content from OpenAI."""
     prompt = (f'You are a data analyst. You will be provided with a json file. The Json file has a table with column identifiers as "Date of Service", "Start Time", "End Time" '
-              f'the first column is a date column with dates in the MM/DD/YYYY format and the other two columns '
-              f'are time in 12-hour formats. The data is captured via OCR which means that there could be '
-              f'mistakes in how the OCR converts the handwritten text. Correct the data in the first column and make '
-              f'sure that the resulting date follows the MM/DD/YYYY format. If there are errors in '
-              f'the second and third column, correct them by making sure that they follow the 12-hour time format. '
-              f'Check the other rows to infer what dates and times should be written based on what was detected and the data in the other rows. '
-              f'if there are any cells in the second or third column with nan, remove the whole row.  '
-              f'please return a csv table with just the columns "Date of Service", "Start Time", "End Time". Create a fourth column with header "Service Auth" and enter the Service Authorization number in all the rows.'
-              f'Just reply with the corrected csv table and nothing else.'
-              f'Here is the table of service dates and times: {json}')
+            f'the first column is a date column with dates in the MM/DD/YYYY format and the other two columns '
+            f'are time in 12-hour formats. The data is captured via OCR which means that there could be '
+            f'mistakes in how the OCR converts the handwritten text. Correct the data in the first column and make '
+            f'sure that the resulting date follows the MM/DD/YYYY format. If there are errors in '
+            f'the second and third column, correct them by making sure that they follow the 12-hour time format. '
+            f'Check the other rows to infer what dates and times should be written based on what was detected and the data in the other rows. '
+            f'if there are any cells in the second or third column with nan, remove the whole row.  '
+            f'please return a csv table with just the columns "Date of Service", "Start Time", "End Time". Create a fourth column with header "Service Auth" and enter the Service Authorization number in all the rows.'
+            f'Just reply with the corrected csv table and nothing else.'
+            f'Here is the json: {json}')
 
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
@@ -98,10 +99,13 @@ def convert(pdf_file_path):
     tables = result_json['tables']
 
     # save_json_to_file(tables, f"json/{base_name}tables.json")       # Troubleshooting tools
-    
-    tables_json = {"tables": tables}
-    print(tables_json)
+    tables_json = process_azure_ocr_json(tables)
 
+
+    # # Current working implementation 27-Sep
+    # tables_json = {"tables": tables}
+    # print(tables_json)
+    # # END Current working implementation 27-Sep
 
     ## Start of Claude Cleanup ##
 

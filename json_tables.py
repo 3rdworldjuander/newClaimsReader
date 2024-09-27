@@ -69,22 +69,32 @@ def process_azure_ocr_json(data):
     
     return json.dumps(result, indent=2)
 
-# Get the JSON file path from command line argument
-json_file_path = sys.argv[1]
-base_name = json_file_path.split('_')[0].split('/')[1]
+def main(json_file_path):
 
-# Load the JSON data
-with open(json_file_path, 'r') as file:
-    data = json.load(file)
+    # Get the JSON file path from command line argument
+    # json_file_path = sys.argv[1]
+    base_name = json_file_path.split('_')[0].split('/')[1]
 
-# Process the data
-result = process_azure_ocr_json(data)
+    # Load the JSON data
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
 
-# Print the result
-print(result)
+    # Process the data
+    result = process_azure_ocr_json(data)
 
-# Save the result to a file
-output_file_path = f"tables/{base_name}_processed_ocr_data.json"
-with open(output_file_path, 'w') as f:
-    f.write(result)
-print(f"Processed data has been saved to {output_file_path}")
+    # Print the result
+    print(result)
+
+    # Save the result to a file
+    output_file_path = f"tables/{base_name}_processed_ocr_data.json"
+    with open(output_file_path, 'w') as f:
+        f.write(result)
+    print(f"Processed data has been saved to {output_file_path}")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python json_tables.py <json_file_path>")
+        sys.exit(1)
+    
+    json_file_path = sys.argv[1]
+    main(json_file_path)
