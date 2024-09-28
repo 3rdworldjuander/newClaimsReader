@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from rich import print
 import json
 from json_tables import *
+from clean_tables import *
 
 # Configuration
 config = {
@@ -40,16 +41,16 @@ def init_claude_client(api_key):
 
 def get_claude_response(client, json):
     """Get the corrected table content from OpenAI."""
-    prompt = (f'You are a data analyst. You will be provided with a json file. The Json file has a table with column identifiers as "Date of Service", "Start Time", "End Time" '
-            f'the first column is a date column with dates in the MM/DD/YYYY format and the other two columns '
-            f'are time in 12-hour formats. The data is captured via OCR which means that there could be '
-            f'mistakes in how the OCR converts the handwritten text. Correct the data in the first column and make '
-            f'sure that the resulting date follows the MM/DD/YYYY format. If there are errors in '
-            f'the second and third column, correct them by making sure that they follow the 12-hour time format. '
+    prompt = (f'You are a data analyst. You will be provided with a json file. Within the json file is an array called date_of_service_table '
+            f'There could me multiple date_of_service arrays in the json file. '
+            f'The objects within the array have pairs of key value content. The data is captured via OCR which means that there could be '
+            f'mistakes in how the OCR converts the handwritten text. Correct the data as follows '
+            f'for the key "Date of Service" the value should be a date in MM/DD/YYYY format, make necessary corrections if the format is incorrect '
+            f'for the key "Start Time" the value should be time in 12-hour time format, make necessary corrections if the format is incorrect '
+            f'for the key "End Time" the value should be time in 12-hour time format, make necessary corrections if the format is incorrect '
             f'Check the other rows to infer what dates and times should be written based on what was detected and the data in the other rows. '
-            f'if there are any cells in the second or third column with nan, remove the whole row.  '
-            f'please return a csv table with just the columns "Date of Service", "Start Time", "End Time". Create a fourth column with header "Service Auth" and enter the Service Authorization number in all the rows.'
-            f'Just reply with the corrected csv table and nothing else.'
+            f'make the correction in the "content": portion of the json and keep the structure of the original json file.'
+            f'Just reply with the corrected json and nothing else.'
             f'Here is the json: {json}')
 
     response = client.messages.create(
@@ -99,8 +100,9 @@ def convert(pdf_file_path):
     tables = result_json['tables']
 
     # save_json_to_file(tables, f"json/{base_name}tables.json")       # Troubleshooting tools
-    tables_json = process_azure_ocr_json(tables)
 
+    # create table pairs of service auth + service dates
+    tables_json = table_pairs_create(tables)    
 
     # # Current working implementation 27-Sep
     # tables_json = {"tables": tables}
@@ -118,17 +120,17 @@ def convert(pdf_file_path):
 
     # Save the CSV data to a file
 
-    output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.csv')
+    output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.json')
     with open(output_file, 'w') as file:
         file.write(what_is_this)
         
     print(f"CSV data has been saved to {output_file}")
 
-    df = pd.read_csv(io.StringIO(what_is_this))
-    service_auth = df['Service Auth'].unique()
-    service_auth_str = str(int(service_auth))
-    print(type(service_auth_str))
-    print(f'Service Authorization No: {service_auth_str}')
+    # df = pd.read_csv(io.StringIO(what_is_this))
+    # service_auth = df['Service Auth'].unique()
+    # service_auth_str = str(int(service_auth))
+    # print(type(service_auth_str))
+    # print(f'Service Authorization No: {service_auth_str}')
 
     ## End of Claude Cleanup ##
 
@@ -147,10 +149,11 @@ def convert(pdf_file_path):
 
     # ### END OF DUMMY DATA FOR TESTING ###
 
-    print(df)
-    print(service_auth_str)
+    # print(df)
+    # print(service_auth_str)
 
-    return df, service_auth_str
+    # return df, service_auth_str
+    return what_is_this
 
 if __name__ == "__main__":
     pdf_file_path = sys.argv[1]

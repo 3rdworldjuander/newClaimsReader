@@ -1,91 +1,98 @@
 import json
 import sys
 import re
+import pandas as pd
 from rich import print
 
-
 def extract_service_authorization(content):
-    if content is None or content.strip() == "":
+    if pd.isna(content) or content.strip() == "":
         return None
     
-    # Try to find the full pattern
     match = re.search(r"Service Authorization \(one SA per page\)#:\s*(\w+)", content)
     if match:
         return match.group(1)
     
-    # If full pattern not found, look for just "Service Authorization" followed by alphanumeric
     match = re.search(r"Service Authorization.*?(\w+)", content)
     if match:
         return match.group(1)
     
-    # If no match found, return None
     return None
 
-def process_azure_ocr_json(data):
+def cleanup_datofservice_table(date_of_service_table):
+ 
+    results = []
+
+    # Convert cells to a DataFrame
+    df = pd.DataFrame(date_of_service_table['cells'])
+    
+    # Separate header and content rows
+    headers = df[df['kind'] == 'columnHeader']
+    content = df[df['kind'] == 'content']
+    
+    # Create a dictionary to map column index to header content
+    header_map = dict(zip(headers['column_index'], headers['content']))
+    
+    # Pivot the content DataFrame
+    pivoted = content.pivot(index='row_index', columns='column_index', values='content')
+    
+    # Rename columns based on header_map
+    pivoted.rename(columns=header_map, inplace=True)
+    
+    # Select only the desired columns
+    desired_columns = ["Date of Service", "Start Time", "End Time"]
+    result_df = pivoted[desired_columns].reset_index(drop=True)
+    
+
+    print(result_df)
+    result_json = result_df.to_dict(orient='records')
+    print(result_json)
+    return result_json
+
+def table_pairs_create(data):
     table_pairs = []
     current_pair = {"service_authorization": None, "date_of_service_table": None}
     
     for table in data:
-        # print(f'table{table}')  # troubleshooting
-        table_content = ""
-        has_date_of_service = False
+        if 'cells' not in table:
+            continue
         
-        if 'cells' in table:
-            for cell in table['cells']:
-                cell_content = cell.get('content', '')
-                table_content += cell_content + " "
-                
-                # Check for "Date of Service" in header
-                if cell.get('kind') == 'columnHeader' and cell.get('row_index') == 0 and "Date of Service" in cell_content:
-                    has_date_of_service = True
+        df = pd.DataFrame(table['cells'])
+        table_content = " ".join(df['content'].fillna(''))
         
-        # Check for "Service Authorization"
+        has_date_of_service = ((df['kind'] == 'columnHeader') & 
+                               (df['row_index'] == 0) & 
+                               df['content'].str.contains("Date of Service")).any()
+        
         if "Service Authorization" in table_content:
-            # Extract the Service Authorization number from table_content
-            table_content = extract_service_authorization(table_content)
-            # If we already have a service authorization in the current pair, start a new pair
+            sa_number = extract_service_authorization(table_content)
             if current_pair["service_authorization"] is not None:
                 table_pairs.append(current_pair)
                 current_pair = {"service_authorization": None, "date_of_service_table": None}
-            current_pair["service_authorization"] = table_content.strip()
+            current_pair["service_authorization"] = sa_number
         
-        # Store the table if it has "Date of Service" header
         if has_date_of_service:
-            current_pair["date_of_service_table"] = table
-            
-            # If we have both parts of the pair, add it to the list and start a new pair
+            current_pair["date_of_service_table"] = cleanup_datofservice_table(table)
             if current_pair["service_authorization"] is not None:
                 table_pairs.append(current_pair)
                 current_pair = {"service_authorization": None, "date_of_service_table": None}
     
-    # Add the last pair if it's not empty
     if current_pair["service_authorization"] is not None or current_pair["date_of_service_table"] is not None:
         table_pairs.append(current_pair)
     
-    # Prepare the result
-    result = {
-        "table_pairs": table_pairs
-    }
-    
+    result = {"table_pairs": table_pairs}
+    print(result)
     return json.dumps(result, indent=2)
 
 def main(json_file_path):
-
-    # Get the JSON file path from command line argument
-    # json_file_path = sys.argv[1]
     base_name = json_file_path.split('_')[0].split('/')[1]
 
-    # Load the JSON data
     with open(json_file_path, 'r') as file:
         data = json.load(file)
 
-    # Process the data
-    result = process_azure_ocr_json(data)
+    result = table_pairs_create(data)
 
-    # Print the result
     print(result)
 
-    # Save the result to a file
     output_file_path = f"tables/{base_name}_processed_ocr_data.json"
     with open(output_file_path, 'w') as f:
         f.write(result)
