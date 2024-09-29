@@ -52,7 +52,6 @@ def import_service_data(data):
     conn.close()
 
     # Prepare feedback
-    # total_entries = len(total_rows)
     successful_entries = total_entries - len(duplicates)
     
     feedback = f"Import completed. {successful_entries} out of {total_entries} entries were successfully imported."
@@ -63,6 +62,3 @@ def import_service_data(data):
 
     return feedback
 
-# Example usage:
-# result = import_service_data(data)
-# print(result)

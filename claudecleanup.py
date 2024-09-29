@@ -104,11 +104,6 @@ def convert(pdf_file_path):
     # create table pairs of service auth + service dates
     tables_json = table_pairs_create(tables)    
 
-    # # Current working implementation 27-Sep
-    # tables_json = {"tables": tables}
-    # print(tables_json)
-    # # END Current working implementation 27-Sep
-
     ## Start of Claude Cleanup ##
 
     # Setting up Claude
@@ -118,7 +113,7 @@ def convert(pdf_file_path):
     print(type(what_is_this))
     print(what_is_this)
 
-    # Save the CSV data to a file
+    # Save the JSON data to a file
 
     output_file = os.path.join(config['CSV_CLAUDE_DIR'],f'{base_name}_claude_output.json')
     with open(output_file, 'w') as file:
@@ -149,10 +144,6 @@ def convert(pdf_file_path):
 
     # ### END OF DUMMY DATA FOR TESTING ###
 
-    # print(df)
-    # print(service_auth_str)
-
-    # return df, service_auth_str
     return what_is_this
 
 if __name__ == "__main__":

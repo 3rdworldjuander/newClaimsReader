@@ -9,7 +9,6 @@ from typing import List
 from uuid import uuid4
 import json
 
-### Experimental Row Render
 hdrs = (Style('''
 button,input { margin: 0 1rem; }
 [role="group"] { border: 1px solid #ccc; }
@@ -51,7 +50,6 @@ def homepage(sess):
     return Title("Service Log Converter"), Titled(
         H1("FastHTML based Service Log Converter"),
         P("This web application extracts data from the claims form for use in NYEIS/EI-Hub claims processing."),
-
     Group(
         Input(type="file", name="pdf_file", accept=".pdf", required=True),
         Button("Convert", 
@@ -79,13 +77,11 @@ def render_table(table_data):
         style="width: 100%; border-collapse: collapse;"
     )
 
-### DB experiment ###
 @rt('/queue')
 def post(d:dict, sess):
     print('Queue Button hit')
     print(sess)
     table_data = json.loads(d.get('table_data', '{}'))
-    # print(table_data)
     db_result = import_service_data(table_data)
     print(db_result)
 
@@ -100,7 +96,7 @@ def post(d:dict, sess):
     #         print(row['Start Time'])
     #         print(row['End Time'])
 
-    output_file = f'todb/{sess}.json'
+    # output_file = f'todb/{sess}.json'
     # with open(output_file, 'w') as file:
     #     file.write(table_data)
         
@@ -110,8 +106,6 @@ def post(d:dict, sess):
     # print(f"JSON data has been saved to {output_file}")
 
     return "Data queued successfully!"
-
-### End DB Experiment
 
 @app.post("/convert")
 async def handle_classify(pdf_file:UploadFile, sess): 
