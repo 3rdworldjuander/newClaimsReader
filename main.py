@@ -144,6 +144,7 @@ async def handle_classify(pdf_file:UploadFile, sess):
 
     return Div(
         Div(
+            Div(*tables_html, style="overflow: auto;"),
             Div(
                 Strong(f'Converting {pdf_file.filename}'),
                 Div(
@@ -156,7 +157,6 @@ async def handle_classify(pdf_file:UploadFile, sess):
                 ),
                 style="display: flex; flex-direction: column; align-items: center;"
             ),
-            Div(*tables_html, style="overflow: auto;"),
             style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; height: calc(100vh - 50px);"
         ),
         Div(
