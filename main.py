@@ -14,7 +14,28 @@ hdrs = (Style('''
 button,input { margin: 0 1rem; }
 [role="group"] { border: 1px solid #ccc; }
 .edited { outline: 2px solid orange; }
-'''), )
+'''), Script('''
+function collectTableData() {
+    let tablePairs = [];
+    document.querySelectorAll('.table-pair').forEach(pairDiv => {
+        let serviceAuth = pairDiv.querySelector('input[name="service_authorization"]').value;
+        let tableRows = pairDiv.querySelectorAll('table tbody tr');
+        let tableData = Array.from(tableRows).map(row => {
+            let inputs = row.querySelectorAll('input');
+            return {
+                "Date of Service": inputs[0].value,
+                "Start Time": inputs[1].value,
+                "End Time": inputs[2].value
+            };
+        });
+        tablePairs.push({
+            service_authorization: serviceAuth,
+            date_of_service_table: tableData
+        });
+    });
+    document.getElementById('table-data').value = JSON.stringify({table_pairs: tablePairs});
+}
+'''))
 
 app, rt = fast_app(hdrs=hdrs)
 
@@ -63,10 +84,11 @@ def render_table(table_data):
 def post(d:dict, sess):
     print('Queue Button hit')
     print(sess)
-    print(d)
-    # db_result = import_service_data(d)
+    table_data = json.loads(d.get('table_data', '{}'))
+    print(table_data)
+    # db_result = import_service_data(table_data)
     # print(db_result)
-
+    return "Data queued successfully!"
 
 ### End DB Experiment
 
@@ -100,7 +122,8 @@ async def handle_classify(pdf_file:UploadFile, sess):
                     style="overflow: auto; margin-bottom: 10px;"
                 ),
                 render_table(table_data),
-                style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;"
+                style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;",
+                cls="table-pair"
             )
         )
 
@@ -122,7 +145,8 @@ async def handle_classify(pdf_file:UploadFile, sess):
             style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; height: calc(100vh - 50px);"
         ),
         Div(
-            Button('Queue', hx_target="#queue_result", hx_post='queue', hx_include="#result"),
+            Input(type="hidden", id="table-data", name="table_data"),
+            Button('Queue', hx_target="#queue_result", hx_post='queue', hx_include="#table-data", onclick="collectTableData()"),
             style="display: flex; justify-content: center; align-items: center; height: 50px;"
         ),
         Div(id="queue_result"),
