@@ -58,6 +58,18 @@ def render_table(table_data):
         style="width: 100%; border-collapse: collapse;"
     )
 
+### DB experiment ###
+@rt('/queue')
+def post(d:dict, sess):
+    print('Queue Button hit')
+    print(sess)
+    print(d)
+    # db_result = import_service_data(d)
+    # print(db_result)
+
+
+### End DB Experiment
+
 @app.post("/convert")
 async def handle_classify(pdf_file:UploadFile, sess): 
     # Save the uploaded pdf_file
