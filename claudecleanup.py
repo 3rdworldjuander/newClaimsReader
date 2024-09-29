@@ -124,7 +124,7 @@ def convert(pdf_file_path):
     with open(output_file, 'w') as file:
         file.write(what_is_this)
         
-    print(f"CSV data has been saved to {output_file}")
+    print(f"JSON data has been saved to {output_file}")
 
     # df = pd.read_csv(io.StringIO(what_is_this))
     # service_auth = df['Service Auth'].unique()

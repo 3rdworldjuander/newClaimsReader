@@ -85,9 +85,30 @@ def post(d:dict, sess):
     print('Queue Button hit')
     print(sess)
     table_data = json.loads(d.get('table_data', '{}'))
-    print(table_data)
-    # db_result = import_service_data(table_data)
-    # print(db_result)
+    # print(table_data)
+    db_result = import_service_data(table_data)
+    print(db_result)
+
+    # for pair in table_data['table_pairs']:
+    #     preview_sa = pair['service_authorization']
+    #     preview_table = pair['date_of_service_table']
+
+    #     print(f'this is Service Auth {preview_sa}')
+    #     # print(preview_table)
+    #     for row in preview_table:
+    #         print(row['Date of Service'])
+    #         print(row['Start Time'])
+    #         print(row['End Time'])
+
+    output_file = f'todb/{sess}.json'
+    # with open(output_file, 'w') as file:
+    #     file.write(table_data)
+        
+    # with open(output_file, 'w') as fp:
+    #     json.dump(table_data, fp)
+
+    # print(f"JSON data has been saved to {output_file}")
+
     return "Data queued successfully!"
 
 ### End DB Experiment
