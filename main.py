@@ -59,12 +59,12 @@ def homepage(sess):
         Input(type="file", name="pdf_file", accept=".pdf", required=True),
         Button("Convert", 
                hx_post="/convert",
-               hx_target="#result",
+               hx_target="#progress_bar, #result",
                hx_encoding="multipart/form-data",
                hx_include='previous input',
                onclick="showProgressMessage()"),
     ),
-    Div(id='progress_bar'),
+    Div(id="progress_bar"),
     Div(id="result")
 )
 
@@ -148,7 +148,7 @@ async def handle_classify(pdf_file:UploadFile, sess):
             )
         )
 
-    return Div(
+    response = Div(
         Div(
             Div(*tables_html, style="overflow: auto;"),
             Div(
@@ -173,6 +173,10 @@ async def handle_classify(pdf_file:UploadFile, sess):
         Div(id="queue_result"),
         style="display: flex; flex-direction: column; height: 100vh;"
     )
+
+    prog_update = Div()
+
+    return response, prog_update
 
 @app.get("/uploads/{filename}")
 async def serve_upload(filename: str):
