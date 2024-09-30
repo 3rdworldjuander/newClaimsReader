@@ -34,6 +34,11 @@ function collectTableData() {
     });
     document.getElementById('table-data').value = JSON.stringify({table_pairs: tablePairs});
 }
+             
+function showProgressMessage() {
+    document.getElementById('progress_bar').innerHTML = "Converting... Please wait";
+}
+
 '''))
 
 app, rt = fast_app(hdrs=hdrs)
@@ -56,7 +61,8 @@ def homepage(sess):
                hx_post="/convert",
                hx_target="#result",
                hx_encoding="multipart/form-data",
-               hx_include='previous input'),
+               hx_include='previous input',
+               onclick="showProgressMessage()"),
     ),
     Div(id='progress_bar'),
     Div(id="result")
@@ -146,7 +152,7 @@ async def handle_classify(pdf_file:UploadFile, sess):
         Div(
             Div(*tables_html, style="overflow: auto;"),
             Div(
-                Strong(f'Converting {pdf_file.filename}'),
+                Strong(f'Done converting {pdf_file.filename}'),
                 Div(
                     Embed(
                         src=f"/uploads/{pdf_file.filename}",
