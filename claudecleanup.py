@@ -60,9 +60,9 @@ def get_claude_response(client, json):
             {"role": "user", "content": prompt}
         ]
     )
-    print(f'Response is type....{type(response)}')
-    print(f'Actual response is....{response}')
-    print(f'This is the response content....{response.content}')
+    # print(f'Response is type....{type(response)}')
+    # print(f'Actual response is....{response}')
+    # print(f'This is the response content....{response.content}')
     return response.content
 
 def analyze_document(document_analysis_client, file_path, model_id):
@@ -110,8 +110,8 @@ def convert(pdf_file_path):
     client = init_claude_client(claude_api_key)
     response_content = get_claude_response(client, tables_json)
     what_is_this = response_content[0].text.strip()
-    print(type(what_is_this))
-    print(what_is_this)
+    # print(type(what_is_this))
+    # print(what_is_this)
 
     # Save the JSON data to a file
 

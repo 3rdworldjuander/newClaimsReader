@@ -43,7 +43,7 @@ def cleanup_datofservice_table(date_of_service_table):
     result_df = pivoted[desired_columns].reset_index(drop=True)
     
 
-    print(result_df)
+    # print(result_df)
     result_json = result_df.to_dict(orient='records')
     # print(result_json)
     return result_json
@@ -76,13 +76,11 @@ def table_pairs_create(data):
                 table_pairs.append(current_pair)
                 current_pair = {"service_authorization": None, "date_of_service_table": None}
 
-        print(f'this is current pair{table_pairs}')
-
     if current_pair["service_authorization"] is not None or current_pair["date_of_service_table"] is not None:
         table_pairs.append(current_pair)
     
     result = {"table_pairs": table_pairs}
-    print(result)
+    # print(result)
     return json.dumps(result, indent=2)
 
 def main(json_file_path):
@@ -93,7 +91,7 @@ def main(json_file_path):
 
     result = table_pairs_create(data)
 
-    print(result)
+    # print(result)
 
     output_file_path = f"tables/{base_name}_processed_ocr_data.json"
     with open(output_file_path, 'w') as f:
