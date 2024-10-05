@@ -94,12 +94,12 @@ def convert(pdf_file_path):
     result = analyze_document(document_analysis_client, pdf_file_path, model_id)
     result_json = result.to_dict()
 
-    # save_json_to_file(result_json, f"json/{base_name}full_result.json")     # Troubleshooting tools
+    save_json_to_file(result_json, f"json/{base_name}full_result.json")     # Troubleshooting tools
 
     # Extract tables
     tables = result_json['tables']
 
-    # save_json_to_file(tables, f"json/{base_name}tables.json")       # Troubleshooting tools
+    save_json_to_file(tables, f"json/{base_name}tables.json")       # Troubleshooting tools
 
     # create table pairs of service auth + service dates
     tables_json = table_pairs_create(tables)    

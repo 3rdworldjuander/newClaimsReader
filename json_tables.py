@@ -45,7 +45,7 @@ def cleanup_datofservice_table(date_of_service_table):
 
     print(result_df)
     result_json = result_df.to_dict(orient='records')
-    print(result_json)
+    # print(result_json)
     return result_json
 
 def table_pairs_create(data):
@@ -58,7 +58,7 @@ def table_pairs_create(data):
         
         df = pd.DataFrame(table['cells'])
         table_content = " ".join(df['content'].fillna(''))
-        
+        # print(f'this is table_content{table_content}')
         has_date_of_service = ((df['kind'] == 'columnHeader') & 
                                (df['row_index'] == 0) & 
                                df['content'].str.contains("Date of Service")).any()
@@ -72,10 +72,12 @@ def table_pairs_create(data):
         
         if has_date_of_service:
             current_pair["date_of_service_table"] = cleanup_datofservice_table(table)
-            if current_pair["service_authorization"] is not None:
+            if current_pair["date_of_service_table"] is not None:
                 table_pairs.append(current_pair)
                 current_pair = {"service_authorization": None, "date_of_service_table": None}
-    
+
+        print(f'this is current pair{table_pairs}')
+
     if current_pair["service_authorization"] is not None or current_pair["date_of_service_table"] is not None:
         table_pairs.append(current_pair)
     
