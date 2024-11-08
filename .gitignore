@@ -9,6 +9,7 @@
 
 *.db
 *.pyc
+notes.txt
 
 sqlite.db-shm
 sqlite.db-wal
