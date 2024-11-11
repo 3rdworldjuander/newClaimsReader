@@ -12,8 +12,8 @@ def import_service_data(data):
         id SERIAL PRIMARY KEY,
         service_auth TEXT,
         date_of_service DATE,
-        start_time TIMESTAMP,
-        end_time TIMESTAMP,
+        start_time TIME,
+        end_time TIME,
         UNIQUE(service_auth, date_of_service, start_time, end_time)
     )
     ''')
@@ -36,8 +36,10 @@ def import_service_data(data):
 
             try:
                 date = datetime.strptime(row['Date of Service'], '%m/%d/%Y').date()
-                start_time = datetime.strptime(f"{row['Date of Service']} {row['Start Time']}", '%m/%d/%Y %I:%M %p')
-                end_time = datetime.strptime(f"{row['Date of Service']} {row['End Time']}", '%m/%d/%Y %I:%M %p')
+                # start_time = datetime.strptime(f"{row['Date of Service']} {row['Start Time']}", '%m/%d/%Y %I:%M %p')
+                start_time = datetime.strptime(f"{row['Start Time']}", '%m/%d/%Y %I:%M %p')
+                # end_time = datetime.strptime(f"{row['Date of Service']} {row['End Time']}", '%m/%d/%Y %I:%M %p')
+                end_time = datetime.strptime(f"{row['End Time']}", '%m/%d/%Y %I:%M %p')
                 rows_to_insert.append((service_auth, date, start_time, end_time))
                 total_entries += 1
             except ValueError:
