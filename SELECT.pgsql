@@ -1,6 +1,6 @@
 SELECT 
     service_auth AS "Service Auth",
-    date_of_service AS "Date of Service",
+    to_char(date_of_service, 'MM/DD/YY')  AS "Date of Service",
     to_char(start_time, 'HH12:MI AM') AS "Start Time",
     to_char(end_time, 'HH12:MI AM')  AS "End Time",
     'F84.0-Autism' AS "Diagnosis Code 1",

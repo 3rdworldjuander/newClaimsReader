@@ -111,7 +111,7 @@ def post(d:dict, sess):
 
     # print(f"JSON data has been saved to {output_file}")
 
-    return "Data queued successfully!"
+    return "Data queued successfully!", db_result
 
 @app.post("/convert")
 async def handle_classify(pdf_file:UploadFile, sess): 
