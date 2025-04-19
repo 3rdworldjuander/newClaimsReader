@@ -54,7 +54,7 @@ def homepage(sess):
     print(f'Session ID is{sess}')
     return Title("Service Log Converter"), Titled(
         H1("FastHTML based Service Log Converter"),
-        P("This web application extracts data from the claims form for use in NYEIS/EI-Hub claims processing."),
+        P("This web application extracts data from the claims form for use in NYEIS/EI-Hub claims processing (mm/dd/yyyy)."),
     Group(
         Input(type="file", name="pdf_file", accept=".pdf", required=True),
         Button("Convert", 
