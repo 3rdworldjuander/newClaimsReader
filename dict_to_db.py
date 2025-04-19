@@ -35,7 +35,17 @@ def import_service_data(data):
                 continue
 
             try:
-                date = datetime.strptime(row['Date of Service'], '%m/%d/%Y').date()
+                # Error handling for when Claude returns mm/dd/yy instead of mm/dd/yyyy
+                raw_date = row['Date of Service'].strip()
+                try:
+                    # Try full year format first (e.g., 04/18/2025)
+                    date = datetime.strptime(raw_date, '%m/%d/%Y').date()
+                except ValueError:
+                    # If that fails, try two-digit year format (e.g., 04/18/25)
+                    date = datetime.strptime(raw_date, '%m/%d/%y').date()
+
+                # date = datetime.strptime(row['Date of Service'], '%m/%d/%Y').date()
+
                 # start_time = datetime.strptime(f"{row['Date of Service']} {row['Start Time']}", '%m/%d/%Y %I:%M %p')
                 start_time = datetime.strptime(f"{row['Start Time']}", '%I:%M %p')
                 # end_time = datetime.strptime(f"{row['Date of Service']} {row['End Time']}", '%m/%d/%Y %I:%M %p')
